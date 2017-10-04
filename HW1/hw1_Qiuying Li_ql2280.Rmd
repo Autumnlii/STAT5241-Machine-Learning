@@ -1,0 +1,101 @@
+---
+title: "hw1"
+author: "Qiuying Li UNI ql2280"
+date: "2/6/2017"
+output:
+  word_document: default
+  pdf_document: default
+---
+1. Apply the three subset selection methods mentioned above to Credit data set. Plot the RSS as a function of the number of variables for these three methods in the same figure.
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("~/Desktop/2017 spring/GR 5241/HW/HW1")
+credit = read.csv("credit.csv", head = TRUE )
+balance = credit$Balance
+library(MASS)
+library(leaps)
+lm3 = regsubsets(balance ~., data = credit)
+summary(lm3)$rss
+lm4 = regsubsets(balance ~., data = credit,method = "forward")
+summary(lm4)$rss
+lm5 = regsubsets(balance ~., data = credit,method = "backward")
+summary(lm5)$rss
+par(mfrow = c(1,1))
+plot(summary(lm3)$rss,pch = 0,main = "RSS of three mehods",ylab = "RSS")
+points(summary(lm4)$rss,pch = 2)
+points(summary(lm5)$rss,pch = 4)
+leg.txt = c("exhaustive","forward","backward ")
+legend("topright",leg.txt,pch= c(0,2,4))
+
+#points(summary(lm5)$rss,col = "green")
+#legend("topright",leg.txt,pch = 1,col= c("red","blue","green"))
+```
+From the above plot, we could tell that the Rss of three methods are very closed to each other.
+
+2. Each subset selection method results in a set of models. For each approach, choose a single optimal model by using Cp and BIC statistics respectively. Report the optimal models for each approach (i.e. specify the predictors in the optimal model).
+```{r cars}
+par(mfrow = c(1,3))
+plot(lm3,scale = "Cp")
+plot(lm4,scale = "Cp")
+plot(lm5,scale = "Cp")
+summary(lm3,scale = "Cp")
+summary(lm4,scale = "Cp")
+summary(lm5,scale = "Cp")
+plot(lm3,scale = "bic")
+plot(lm4,scale = "bic")
+plot(lm5,scale = "bic")
+summary(lm3,scale = "bic")
+summary(lm4,scale = "bic")
+summary(lm5,scale = "bic")
+```
+Problem 3 (PCA, 15 points)
+1. For each of the 30 stocks in the Dow Jones Industrial Average, download the closing prices for every trading day from January 1, 2010 to January 1, 2011. Y
+```{r}
+sym1 = c("MMM","AXP","AAPL","BA","CAT","CVX","CSCO","KO","DD","XOM","GE",
+         "GS","HD","IBM","INTC","JNJ","JPM","MCD","MRK","MSFT","NKE","PFE",
+         "PG","TRV","UNH","UTX","VZ","V","WMT","DIS")
+vec = c("601288","601668","600028")
+web = NULL
+title = NULL
+stock = NULL
+for (i in 1:length(vec)){
+  web[i] = paste("http://chart.finance.yahoo.com/table.csv?s=", vec[i],".SS&a=0&b=11&c=2017&d=0&e=11&f=2017&g=m&ignore=.csv",sep = "")
+  title[i] = paste(vec[i],".csv",sep = "")
+  download.file (web[i],title[i],quiet = FALSE)
+}
+d = c(1:252)
+ pr= matrix(d,nrow = 252,ncol = 30)
+for( i in 1:length(sym1))
+{
+  stock = read.csv(title[i],header = T)
+  m = stock$ Close
+  pr[,i] = m
+}
+colnames(pr) = sym1
+str(pr)
+```
+
+2. Perform a PCA on the prices and create the biplot
+```{r setup, warning = FALSE}
+par(mfrow = c(1,1))
+pca1 = princomp(pr, cor = F,center = TRUE,scale. = TRUE)
+biplot(pca1)
+screeplot(pca1)
+```
+
+3.Repeat part 2 with cor=TRUE. This is equivalent to scale each column of the data matrix
+```{r, warning = FALSE}
+pca2 = princomp(pr, cor = T,center = TRUE,scale. = TRUE)
+biplot(pca2)
+screeplot(pca2)
+```
+4. Calculate the return for each stock, and repeat part 3 on the return data. I
+```{r}
+pr1 = pr[-1,]
+pr2 = pr[-252,]
+ret1 = pr1 - pr2
+pca3= princomp(ret1, cor = T,center = TRUE,scale. = TRUE)
+biplot(pca3)
+screeplot(pca3)
+
+```

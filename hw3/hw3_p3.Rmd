@@ -1,0 +1,40 @@
+---
+title: "hw3"
+author: "Qiuying Li UNI ql2280"
+date: "3/7/2017"
+output: pdf_document
+---
+
+```{r}
+library("e1071")
+setwd("~/Desktop/2017 spring/GR 5241/HW/hw3")
+data5 = read.table("train.5.txt", sep = ",")
+data5$y <- rep(1, nrow(data5))
+data6 = read.table("train.6.txt", sep = ",")
+data6$y <- rep(-1, nrow(data6))
+
+data = rbind(data5, data6)
+data$y <- factor(data$y)
+
+#test data & test data
+test = data[sample(nrow(data), 0.2*nrow(data)), ]
+train = data[sample(nrow(data), 0.8*nrow(data)), ]
+
+#cross validation 
+#model.c <- svm(y~., data = train, cross= c,kerne = "linear",scale = F)
+model_c <- tune.svm(y~., data = train,cost = c(0.001,0.01,0.1,1), cross = 10 ,kernel = "linear", scale = F)
+m_c_fit = model_c$best.model
+plot(model_c,type = "contour",main = "Tuning on different cost level Linear kernel ")
+#Error rate
+table1 = table(true = test$y,pred = predict(m_c_fit,test));table1
+error = (table1[1,2]+table1[2,1])/nrow(test);error
+
+#Train an SVM with soft margin and RBF kernel.
+model_rbf <- tune(svm, y ~., data = train,kernel = "radial", ranges  = list(cost = c(0.005,0.05,0.5),gamma = c(0.05,0.5,5)),scale =F)
+plot(model_rbf,type = "contour",main = "Tuning on different cost on gamma")
+m_rbf_fit = model_rbf$best.model
+table2 = table(true = test$y,pred = predict(m_rbf_fit,test));table2
+error_2 = (table2[1,2]+table2[2,1])/nrow(test);error
+
+
+```

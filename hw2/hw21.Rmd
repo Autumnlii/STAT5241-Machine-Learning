@@ -1,0 +1,76 @@
+---
+title: "HW2_P3"
+author: "Qiuying Li UNI ql2280"
+date: "2/15/2017"
+output:
+  pdf_document: default
+  word_document: default
+---
+1. LDA on the original 256 dimensional space.
+```{r,warning=FALSE}
+setwd("~/Desktop/2017 spring/GR 5241/HW/hw2")
+library(MASS)
+train_3 <- read.table("train_3.txt",sep=",",head = F)
+train_5 <- read.table("train_5.txt",sep=",",head = F)
+train_8 <- read.table("train_8.txt",sep=",", head = F)
+#making the matrix of of training data 
+training_x = rbind(as.matrix(train_3),as.matrix(train_5),as.matrix(train_8))
+training_y = rep(c(3,5,8),c(nrow(train_3),nrow(train_5),nrow(train_8)))
+test_data = as.matrix(read.table("zip_test.txt",head = F))
+#making the test data, y is the first column of the test data
+test_y = test_data[,1]
+test_x = test_data[(test_y==3|test_y==5|test_y==8), -1]
+test_y = test_y[ test_y==3 | test_y==5 | test_y==8]
+
+pred_errors= matrix(0,nrow = 4, ncol = 2)
+library(MASS)
+m1 = lda(training_x,training_y)
+pred_errors[1,1] = sum(predict(m1)$class!=training_y)/length(training_y) ;pred_errors[1,1]
+pred_errors[1,2] = sum( predict(m1,test_x)$class != test_y) / length(test_y); pred_errors[1,2]
+
+```
+(b) LDA on the leading 49 principal components
+```{r}
+train_x_center = apply(training_x,2,mean)
+train_xx = scale ( training_x , center = train_x_center  , scale=F) 
+test_xx = scale ( test_x , center = train_x_center, scale=F)
+pc = svd(train_xx)$v[ ,1:49]
+pctrain = train_xx %*% pc
+pctest = test_xx%*% pc
+m2=lda (pctrain , training_y)
+pred_errors [2 ,1] = sum(predict(m2)$class !=training_y)/length(training_y) ; pred_errors [2 ,1]
+pred_errors[2,2] = sum(predict(m2,pctest)$class!=test_y)/length(test_y);pred_errors[2,2]
+```
+3. LDA when you filter the data as follows. Each non-overlapping 2 × 2 pixel block is replaced by its average.
+```{r}
+filterdata = function(x){
+x = matrix(x,16,16)
+filter = rep(1:2,8)
+x = x[filter==1,]+x[filter==2,]
+x = x[,filter==1]+x [,filter==2] 
+as.vector(x)/4
+}
+xtrain = t(apply(training_x,1,filterdata))
+xtest = t(apply(test_x,1,filterdata))
+m3 = lda(xtrain,training_y)
+pred_errors[3,1] = sum(predict(m3)$class!=training_y)/length(training_y);pred_errors[3,1] 
+pred_errors[3,2] = sum(predict(m3,xtest)$class!=test_y)/length(test_y);pred_errors[3,2]
+```
+
+4. Multiple linear logistic regression using the same filtered data as in the previous question. [Use the multinomial family in the R package glmnet; use the solution at the end of the path].
+```{r}
+library (glmnet)
+library(nnet)
+a1 = kronecker(diag(8), cbind(c(.5, .5)))
+a2 <- kronecker(a1, a1)
+dim(a2)
+dim(training_x)
+training2 <- data.frame(training_y,(training_x %*% a2) ) 
+test2 <- data.frame(test_y, test_x %*% a2 ) 
+m_logist <- multinom(training_y ~ ., training2)
+p_train <- predict(m_logist , training2)
+p_test <- predict(m_logist , test2)
+pred_errors[4,1] = sum(p_train!=training_y)/length(training_y)
+pred_errors[4,2] = sum(p_test!=test_y)/length(test_y)
+print(pred_errors)
+```

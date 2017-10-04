@@ -1,0 +1,31 @@
+---
+title: "hw 2"
+author: "Qiuying Li UNI ql2280"
+date: "2/15/2017"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+# We have seen that in p = 2 dimensions, a linear decision boundary takes the form β0 + β1X1 + β2X2 = 0. We now investigate a non-linear decision boundary
+(a) Sketh the curve (1+X1)^2 +(2−X2)^2 =4.
+```{r}
+
+plot(NA, NA, type = "n", xlim = c(-3, 1), ylim = c(0, 4), asp = 1, xlab = "X1", ylab = "X2");symbols(c(-1), c(2), circles = c(2), add = TRUE, inches = FALSE);points(-1,2,col = "red");text(-1,2.2,"center")
+
+```
+(b) On your sketch, indicate the set of points for which as well as the set of points for which (1+X1)^2 +(2−X2)^2 >4, (1+X1)^2 +(2−X2)^2 ≤4.
+```{r}
+plot(NA, NA, type = "n", xlim = c(-3, 1), ylim = c(0, 4), asp = 1, xlab = "X1", ylab = "X2");symbols(c(-1), c(2), circles = c(2), add = TRUE, inches = FALSE);text(c(-1), c(2), "f(x1,x2)≤4");text(c(-4), c(2), "f(x1,x2)>4");
+```
+(c) Suppose that a classifier assigns an observation to the blue class if
+(1+X1)2 +(2−X2)2 >4,and to the red class otherwise. To what class is the observation (0,0) classified? What about (−1,1),(2, 2) or (3, 8)?
+
+```{r}
+plot(c(0, -1, 2, 3), c(0, 1, 2, 8), col = c("green", "red", "green", "green"), 
+    type = "p", asp = 1, xlab = "X1", ylab = "X2");symbols(c(-1), c(2), circles = c(2), add = TRUE, inches = FALSE)
+```
+(d) Argue that while the decision boundary in (c) is not linear in terms of X1 and X2, it is linear in terms of X1, X12, X2 and X2.
+```{r}
+
+```
